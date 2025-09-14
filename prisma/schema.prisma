@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  phone         String
+  email         String   @unique
+  isAdmin       UserRole @default(USER)
+  hobbies       Json
+  image         Bytes?
+  profile       Profile? //One to One with Profile
+  posts         Post[]   @relation("writtenPosts")
+  favoritePosts Post[]   @relation("favoritePosts")
+
+  @@unique([name, phone])
+  @@index([email])
+}
+
+model Post {
+  id            String     @id @default(uuid())
+  title         String
+  author        User       @relation("writtenPosts", fields: [authorId], references: [id])
+  rating        Int
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  authorId      String
+  favoritedBy   User?      @relation("favoritePosts", fields: [favoritedById], references: [id])
+  favoritedById String?
+  categories    Category[] //Many to Many with Posts
+}
+
+model Category {
+  id    String @id @default(uuid())
+  posts Post[] //Many to Many with Posts
+}
+
+model Profile {
+  id           String  @id @default(uuid())
+  bio          String?
+  emailUpdated Boolean
+  user         User    @relation(fields: [UserId], references: [id])
+  UserId       String  @unique //one to one with user
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
