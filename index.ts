@@ -26,7 +26,31 @@ async function UserCRUD(){
                 }
             }
         },include:{profile:true}
+        const users = await prisma.user.findMany({
+        select:{
+            name:true,
+            email:true,
+            profile:{select:{bio:true}}
+        }
+    });
+    console.log(users);
     });*/
+    const manyUsers = await prisma.user.createMany({data:[
+            {
+                name: "Ramy Elshrief",
+                email: "ahmedel-shrief@gmail.com",
+                phone: "01043319471",
+                hobbies: JSON.stringify({hobby1: "Manga Yaoi", hobby2: "Football"}),
+                isAdmin: "ADMIN"
+            },
+            {
+                name: "Mohamed Elshrief",
+                email: "mohamed-shrief@gmail.com",
+                phone: "01043212471",
+                hobbies: JSON.stringify({hobby1: "Manga", hobby2: "VollyBall"}),
+                isAdmin: "USER"
+            }
+        ]});
     const users = await prisma.user.findMany({
         select:{
             name:true,
